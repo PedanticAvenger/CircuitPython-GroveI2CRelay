@@ -27,7 +27,6 @@ This exposes a series of object functions to your application:
 +	`print_channel_status(int_value)` - Prints out a formatted line with "Relay X On" or "Relay X Off"
 +	`print_channel_status_all` - Prints out a formatted line with status of all the relays displayed. e.g.  
 "| 1: On  | 2: Off | 3: Off | 4: On  |" for a 4 relay module 
-+   `scanI2CDevice` - Scans the I2C bus and displays addresses found, included as part of development troubleshooting but could be integrated into a proeject for hardware setup automation.
 +   `get_firmware_version` - returns a byte value to display the version of the firmware installed on the board, included for development troubleshooting.
 
 Bit Values for control of relays.

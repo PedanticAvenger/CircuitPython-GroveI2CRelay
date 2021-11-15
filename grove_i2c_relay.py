@@ -8,6 +8,8 @@
 # =========================================================
 CMD_READ_FIRMWARE_VER = 0x13
 CMD_CHANNEL_CONTROL = 0x10
+CMD_SAVE_I2C_ADDR = 0x11
+CMD_READ_I2C_ADDR = 0x12
 CMD_READ_FIRMWARE_VER = 0x13
 CHANNEL_BIT = {
     "1": 0b00000001,
@@ -74,12 +76,7 @@ class Relay:
                 try:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
-                        bytes(CMD_CHANNEL_CONTROL),
-                        stop=False,
-                    )
-                    self.i2c.writeto(
-                        self.DEVICE_ADDRESS,
-                        bytes(self.channel_state),
+                        bytes(CMD_CHANNEL_CONTROL + self.channel_state),
                         stop=True,
                     )
                     print("Sent {:b}".format(self.channel_state))
@@ -102,12 +99,7 @@ class Relay:
                 try:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
-                        bytes(CMD_CHANNEL_CONTROL),
-                        stop=False,
-                    )
-                    self.i2c.writeto(
-                        self.DEVICE_ADDRESS,
-                        bytes(self.channel_state),
+                        bytes(CMD_CHANNEL_CONTROL + self.channel_state),
                         stop=True,
                     )
                     print("Sent {:}".format(self.channel_state))
@@ -129,6 +121,7 @@ class Relay:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
                 bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                stop=True,
             )
 
         finally:
@@ -144,6 +137,7 @@ class Relay:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
                 bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                stop=True,
             )
 
         finally:
@@ -185,25 +179,6 @@ class Relay:
             else:
                 output += ": Off | "
         print("Relay status: {}".format(output))
-
-    def scanI2CDevice(self):
-        error = 0x00
-        address = 0x00
-        result = 0x00
-        nDevices = 0
-        while not self.i2c.try_lock():
-            pass
-
-            try:
-                list = self.i2c.scan()
-                for i in list:
-                    print("Found I2C device at 0x{:x}".format(i))
-
-                if len(list) == 0:
-                    print("No I2C devices found\n")
-
-            finally:
-                self.i2c.unlock()
 
     def get_firmware_version(self):
         while not self.i2c.try_lock():
