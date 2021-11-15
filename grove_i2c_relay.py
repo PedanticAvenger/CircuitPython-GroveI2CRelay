@@ -93,7 +93,7 @@ class Relay:
             if 0 < relay_num <= self.NUM_RELAY_PORTS:  # check for valid relay number
                 if self.debug:
                     print("Turning relay {} off".format(relay_num))
-                self.channel_state &= 0 << (relay_num - 1)
+                self.channel_state &= ~(1 << (relay_num - 1))
                 print("Current Channel State: {0:8b}".format(self.channel_state))
                 while not self.i2c.try_lock():
                     pass
