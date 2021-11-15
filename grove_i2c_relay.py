@@ -1,10 +1,11 @@
 # =========================================================
-# Seeed Studio RGrove - 4-Channel SPDT Relay
+# Seeed Studio Grove - 4/8-Channel I2C SPDT/SSR Relay Board
+# CircuitPython Module
 #
 # by Raymond Richmond
 #
 # Modified from code by John M. Wargo (https://github.com/johnwargo/seeed-studio-relay-v2)
-# to support CircuitPython and this specific relay board.
+# to support CircuitPython and this specific relay board family.
 # =========================================================
 CMD_READ_FIRMWARE_VER = 0x13
 CMD_CHANNEL_CONTROL = 0x10
@@ -77,8 +78,8 @@ class Relay:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
                         bytes(CMD_CHANNEL_CONTROL + self.channel_state),
-                        stop=True,
                     )
+                    print("Sent {:x}".format(self.DEVICE_ADDRESS))
                     print("Sent {:b}".format(self.channel_state))
                 finally:
                     self.i2c.unlock()
@@ -92,7 +93,7 @@ class Relay:
             if 0 < relay_num <= self.NUM_RELAY_PORTS:  # check for valid relay number
                 if self.debug:
                     print("Turning relay {} off".format(relay_num))
-                self.channel_state &= ~(1 << (relay_num - 1))
+                self.channel_state &= 0 << (relay_num - 1)
                 print("Current Channel State: {0:8b}".format(self.channel_state))
                 while not self.i2c.try_lock():
                     pass
@@ -100,9 +101,9 @@ class Relay:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
                         bytes(CMD_CHANNEL_CONTROL + self.channel_state),
-                        stop=True,
                     )
-                    print("Sent {:}".format(self.channel_state))
+                    print("Sent {:x}".format(self.DEVICE_ADDRESS))
+                    print("Sent {:b}".format(self.channel_state))
 
                 finally:
                     self.i2c.unlock()
@@ -114,14 +115,13 @@ class Relay:
     def all_channel_on(self):
         if self.debug:
             print("Turning all relays ON")
-        self.channel_state |= 0x00 << 0
+        self.channel_state |= 0xF << 0
         while not self.i2c.try_lock():
             pass
         try:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
                 bytes(CMD_CHANNEL_CONTROL + self.channel_state),
-                stop=True,
             )
 
         finally:
@@ -137,7 +137,6 @@ class Relay:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
                 bytes(CMD_CHANNEL_CONTROL + self.channel_state),
-                stop=True,
             )
 
         finally:
