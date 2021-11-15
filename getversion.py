@@ -1,9 +1,4 @@
 #!/usr/bin/python
-'''*****************************************************************************************************************
-    Seeed Studio Relay Board Library V2
-    Test Application #1
-    By John M. Wargo (https://www.johnwargo.com)
-********************************************************************************************************************'''
 
 import sys
 import time
@@ -27,4 +22,3 @@ if __name__ == "__main__":
         relay.all_off()
         # exit the application
         sys.exit(0)
-

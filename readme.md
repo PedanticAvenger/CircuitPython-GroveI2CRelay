@@ -4,7 +4,7 @@ Working on a CircuitPython based system for a meat dry curing chamger I wanted t
 
 > **Note:** I am CircuitPython novice so this module will be functional for my purposes but may have issues and I'm more than willing to accept PRs and/or hand this over to more capable hands if ongoing support for it is deemed appropriate.
 
-In the repository, you'll find two files:
+In the repository, you'll find three files:
 
 +	`grove_i2c_relay.py` - A CircuitPython module that exposes several functions you can use in your own applications to control the relay board. The module is covered in the next section.
 +	`4relaytesttest.py` - This is a sample CircuitPython application to exercise the 4 channel module and validate that everything works.
@@ -16,7 +16,7 @@ To use the module in your ownCircuitPython applications, copy the module (`relay
 
 	import grove_i2c_relay
 
-This exposes a series of functions to your application:
+This exposes a series of object functions to your application:
 
 +	`channel_on(int_value)` - Turns a single relay on. Pass an integer value between `1` and `4` (inclusive) to the function to specify the relay you wish to turn on. For example: `relay_on(1)` will turn the first relay (which is actually relay `0` internally) on.
 +	`channel_off(int_value)` - Turns a single relay on. Pass an integer value between 1 and 4 (inclusive) to the function to specify the relay you wish to turn on. For example: `relay_on(4)` will turn the first relay (which is actually relay `3` internally) off.
@@ -26,7 +26,7 @@ This exposes a series of functions to your application:
 +	`get_channel_status` - Returns a Boolean value indicating the status of the specified relay. `True` if the relay is on, `false` if the relay is off. This function was added to enable the capabilities of the `toggle_channel` function described previously.
 +	`print_channel_status(int_value)` - Prints out a formatted line with "Relay X On" or "Relay X Off"
 +	`print_channel_status_all` - Prints out a formatted line with status of all the relays displayed. e.g.  
-"| On  | Off | Off | On  |" for a 4 relay module or "| Off | Off | Off | Off | Off | On | Off | On |" for an 8 relay.
+"| 1: On  | 2: Off | 3: Off | 4: On  |" for a 4 relay module 
 +   `scanI2CDevice` - Scans the I2C bus and displays addresses found, included as part of development troubleshooting but could be integrated into a proeject for hardware setup automation.
 +   `get_firmware_version` - returns a byte value to display the version of the firmware installed on the board, included for development troubleshooting.
 

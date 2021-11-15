@@ -1,9 +1,4 @@
 #!/usr/bin/python
-'''*****************************************************************************************************************
-    Seeed Studio Relay Board Library V2
-    Test Application #1
-    By John M. Wargo (https://www.johnwargo.com)
-********************************************************************************************************************'''
 
 import sys
 import time
@@ -15,10 +10,10 @@ def process_loop():
 
     # now cycle each relay every second in an infinite loop
     while True:
-        relay.on(2)
+        relay.channel_on(4)
         relay.print_status_all()
         time.sleep(2)
-        relay.off(2)
+        relay.channel_off(4)
         relay.print_status_all()
         time.sleep(2)
 
@@ -34,7 +29,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nExiting application")
         # turn off all of the relays
-        relay.all_off()
+        relay.all_channel_off()
         # exit the application
         sys.exit(0)
-
