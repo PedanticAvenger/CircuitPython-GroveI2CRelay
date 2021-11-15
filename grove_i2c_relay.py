@@ -79,8 +79,9 @@ class Relay:
                         self.DEVICE_ADDRESS,
                         bytes(CMD_CHANNEL_CONTROL + self.channel_state),
                     )
-                    print("Sent {:x}".format(self.DEVICE_ADDRESS))
-                    print("Sent {:b}".format(self.channel_state))
+                    if self.debug:
+                        print("Sent {:x}".format(self.DEVICE_ADDRESS))
+                        print("Sent {:b}".format(self.channel_state))
                 finally:
                     self.i2c.unlock()
             else:
@@ -102,8 +103,9 @@ class Relay:
                         self.DEVICE_ADDRESS,
                         bytes(CMD_CHANNEL_CONTROL + self.channel_state),
                     )
-                    print("Sent {:x}".format(self.DEVICE_ADDRESS))
-                    print("Sent {:b}".format(self.channel_state))
+                    if self.debug:
+                        print("Sent {:x}".format(self.DEVICE_ADDRESS))
+                        print("Sent {:b}".format(self.channel_state))
 
                 finally:
                     self.i2c.unlock()
