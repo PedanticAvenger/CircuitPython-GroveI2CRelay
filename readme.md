@@ -31,16 +31,24 @@ This exposes a series of object functions to your application:
 
 Bit Values for control of relays.
 
-| Relay | Off       | On (binary) | On (Integer) |
-|-------|-----------|-------------|--------------| 
-| 1     | xxxx xxx0 | xxxx xxx1   | 1            |
-| 2     | xxxx xx0x | xxxx xx1x   | 2            |
-| 3     | xxxx x0xx | xxxx x1xx   | 4            |
-| 4     | xxxx 0xxx | xxxx 1xxx   | 8            |
-| 5     | xxx0 xxxx | xxx1 xxxx   | 16           |
-| 6     | xx0x xxxx | xx1x xxxx   | 32           |
-| 7     | x0xx xxxx | x1xx xxxx   | 64           |
-| 8     | 0xxx xxxx | 1xxx xxxx   | 128          |
+       1   2   3   4
+       ---------------
+0x00:  OFF OFF OFF OFF
+0x01:  ON  OFF OFF OFF
+0x02:  OFF ON  OFF OFF
+0x03:  ON  ON  OFF OFF
+0x04:  OFF OFF ON  OFF
+0x05:  ON  OFF ON  OFF
+0x06:  OFF ON  ON  OFF
+0x07:  ON  ON  ON  OFF
+0x08:  OFF OFF OFF ON
+0x09:  ON  OFF OFF ON
+0x0a:  OFF ON  OFF ON
+0x0b:  ON  ON  OFF ON
+0x0c:  OFF OFF ON  ON
+0x0d:  ON  OFF ON  ON
+0x0e:  OFF ON  ON  ON
+0x0f:  ON  ON  ON  ON
 
 The module has a couple configuration Values you will want to keep track of:
 

@@ -38,9 +38,9 @@ class Relay:
 
         self.DEVICE_ADDRESS = device_address
         self.NUM_RELAY_PORTS = num_relays  # 4 or 8 are really the only allowed numbers
-        self.channel_state = 0
+        self.channel_state = 0x00
 
-        print("Initializing relay board at 0x{:x}".format(device_address))
+        print("Initializing relay board at 0x{:x}".format(self.DEVICE_ADDRESS))
 
         if SCL is None:
             SCL = board.D5  # Set this based on board pins, defined in Adafruit board.
@@ -58,7 +58,7 @@ class Relay:
         try:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
-                bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
             )
 
         finally:
@@ -71,17 +71,14 @@ class Relay:
                 if self.debug:
                     print("Turning relay {} on".format(relay_num))
                 self.channel_state |= 1 << (relay_num - 1)
-                print("Current Channel State: {0:8b}".format(self.channel_state))
                 while not self.i2c.try_lock():
                     pass
                 try:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
-                        bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                        bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
                     )
-                    if self.debug:
-                        print("Sent {:x}".format(self.DEVICE_ADDRESS))
-                        print("Sent {:b}".format(self.channel_state))
+
                 finally:
                     self.i2c.unlock()
             else:
@@ -95,17 +92,13 @@ class Relay:
                 if self.debug:
                     print("Turning relay {} off".format(relay_num))
                 self.channel_state &= ~(1 << (relay_num - 1))
-                print("Current Channel State: {0:8b}".format(self.channel_state))
                 while not self.i2c.try_lock():
                     pass
                 try:
                     self.i2c.writeto(
                         self.DEVICE_ADDRESS,
-                        bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                        bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
                     )
-                    if self.debug:
-                        print("Sent {:x}".format(self.DEVICE_ADDRESS))
-                        print("Sent {:b}".format(self.channel_state))
 
                 finally:
                     self.i2c.unlock()
@@ -123,7 +116,7 @@ class Relay:
         try:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
-                bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
             )
 
         finally:
@@ -138,7 +131,7 @@ class Relay:
         try:
             self.i2c.writeto(
                 self.DEVICE_ADDRESS,
-                bytes(CMD_CHANNEL_CONTROL + self.channel_state),
+                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
             )
 
         finally:

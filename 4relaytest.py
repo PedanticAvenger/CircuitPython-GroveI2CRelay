@@ -37,7 +37,7 @@ if __name__ == "__main__":
     try:
         relay.all_channel_on()
         time.sleep(1)
-        relay_all_channel_off()
+        relay.all_channel_off()
         time.sleep(1)
         process_loop()
     except KeyboardInterrupt:
