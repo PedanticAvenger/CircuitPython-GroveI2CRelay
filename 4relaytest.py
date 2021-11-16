@@ -26,6 +26,18 @@ def process_loop():
         time.sleep(1)
         relay.channel_off(4)
         time.sleep(1)
+        relay.channel_on(1)
+        relay.channel_on(3)
+        time.sleep(1)
+        relay.channel_off(1)
+        relay.channel_off(3)
+        time.sleep(1)
+        relay.channel_on(2)
+        relay.channel_on(4)
+        time.sleep(1)
+        relay.channel_off(2)
+        relay.channel_off(4)
+        time.sleep(1)
 
 
 # Now see what we're supposed to do next
