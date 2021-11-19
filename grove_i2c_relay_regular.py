@@ -15,11 +15,10 @@ from smbus2 import SMBus
 import time
 
 # Globals for the object
-CMD_READ_FIRMWARE_VER = [0x13]
-CMD_CHANNEL_CONTROL = [0x10]
-CMD_SAVE_I2C_ADDR = [0x11]
-CMD_READ_I2C_ADDR = [0x12]
-CMD_READ_FIRMWARE_VER = [0x13]
+CMD_CHANNEL_CONTROL = 0x10
+CMD_SAVE_I2C_ADDR = 0x11
+CMD_READ_I2C_ADDR = 0x12
+CMD_READ_FIRMWARE_VER = 0x13
 CHANNEL_BIT = {
     "1": 0b00000001,
     "2": 0b00000010,
@@ -38,8 +37,6 @@ class Relay:
         i2cbus=1,
         device_address=0x11,
         num_relays=4,
-        SCL=None,
-        SDA=None,
         debug_action=False,
     ):
 
@@ -56,18 +53,21 @@ class Relay:
         self.debug = debug_action
 
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(
-                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+            i2c_bus.write_byte_data(
+                self.DEVICE_ADDRESS,
+                CMD_CHANNEL_CONTROL,
+                self.channel_state,
             )
-        return True
 
     # If you have address conflicts on your I2C bus you can use this function to reset the relay module address
     # Remember to change your address in your code for future instantiations of this object
 
     def change_i2c_address(self, old_address, new_address):
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(
-                self.DEVICE_ADDRESS, CMD_SAVE_I2C_ADDR, [new_address]
+            i2c_bus.write_i2c_byte_data(
+                self.DEVICE_ADDRESS,
+                CMD_SAVE_I2C_ADDR,
+                new_address,
             )
             self.DEVICE_ADDRESS = new_address
         return True
@@ -75,8 +75,10 @@ class Relay:
     # This function is for when your code keeps track of the full state of all relays and you just want to toggle directly.
     def channel_control(self, state):
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(
-                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [state]
+            i2c_bus.write_i2c_byte_data(
+                self.DEVICE_ADDRESS,
+                CMD_CHANNEL_CONTROL,
+                state,
             )
             self.channel_state = state
             time.sleep(
@@ -92,8 +94,10 @@ class Relay:
                     print("Turning relay {} on".format(relay_num))
                 self.channel_state |= 1 << (relay_num - 1)
                 with SMBus(self.I2CBusNum) as i2c_bus:
-                    i2c_bus.write_i2c_block_data(
-                        self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+                    i2c_bus.write_byte_data(
+                        self.DEVICE_ADDRESS,
+                        CMD_CHANNEL_CONTROL,
+                        self.channel_state,
                     )
                 return True
             else:
@@ -111,8 +115,10 @@ class Relay:
                     print("Turning relay {} off".format(relay_num))
                 self.channel_state &= ~(1 << (relay_num - 1))
                 with SMBus(self.I2CBusNum) as i2c_bus:
-                    i2c_bus.write_i2c_block_data(
-                        self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+                    i2c_bus.write_byte_data(
+                        self.DEVICE_ADDRESS,
+                        CMD_CHANNEL_CONTROL,
+                        self.channel_state,
                     )
                 return True
             else:
@@ -128,8 +134,10 @@ class Relay:
             print("Turning all relays ON")
         self.channel_state |= 0xF << 0
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(
-                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+            i2c_bus.write_byte_data(
+                self.DEVICE_ADDRESS,
+                CMD_CHANNEL_CONTROL,
+                int(self.channel_state),
             )
         return True
 
@@ -139,8 +147,10 @@ class Relay:
             print("Turning all relays OFF")
         self.channel_state &= ~(0xF << 0)
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(
-                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+            i2c_bus.write_byte_data(
+                self.DEVICE_ADDRESS,
+                CMD_CHANNEL_CONTROL,
+                int(self.channel_state),
             )
         return True
 
@@ -189,5 +199,6 @@ class Relay:
     # 99% of the time people won't need this I suspect but copied as it was part of Arduino ref lib
     def get_firmware_version(self):
         with SMBus(self.I2CBusNum) as i2c_bus:
-            i2c_bus.write_i2c_block_data(self.DEVICE_ADDRESS, 0, CMD_READ_FIRMWARE_VER)
-        return i2c_bus.read_i2c_block_data(self.DEVICE_ADDR, 0, 7)
+            i2c_bus.write_byte_data(self.DEVICE_ADDRESS, 0, CMD_READ_FIRMWARE_VER)
+            ver = i2c_bus.read_byte_data(self.DEVICE_ADDRESS, 0)
+        return ver
