@@ -3,12 +3,15 @@
 import sys
 import time
 
-from grove_i2c_relay import Relay
+from grove_i2c_relay_circuitpython import Relay
+
+# Use following line if you are not using CircuitPython
+# from grove_i2c_relay_regular import Relay
 
 
 def process_loop():
 
-    # now cycle each relay every second in an infinite loop
+    # now cycle each relay every second in a loop
     while True:
         relay.channel_on(1)
         time.sleep(1)
@@ -40,7 +43,7 @@ def process_loop():
         time.sleep(1)
 
 
-# Now see what we're supposed to do next
+# Startup
 if __name__ == "__main__":
     # Create the relay object
     relay = Relay(debug_action=True)

@@ -1,22 +1,25 @@
-# =========================================================
-# Seeed Studio Grove - 4/8-Channel I2C SPDT/SSR Relay Board
-# Python Module
-#
-# by Raymond Richmond
-#
-# Modified from code by John M. Wargo
-# (https://github.com/johnwargo/seeed-studio-relay-v2)
-# to support Python on linux SBCs and this specific relay board family.
-# _regular version is for a "typical" Pi environment (or RockPi 4 in my case)
-# not requireing circuitpython but leveraging SMBus calls
-# =========================================================
+"""
+ Seeed Studio Grove - 4/8-Channel I2C SPDT/SSR Relay Board
+ Python Module
+
+ by Raymond Richmond
+
+ Modified from code by John M. Wargo
+ (https://github.com/johnwargo/seeed-studio-relay-v2)
+ to support Python on linux SBCs and this specific relay board family.
+ _regular version is for a "typical" python sbc environment i.e.
+ not requireing circuitpython but leveraging SMBus calls
+"""
+
+from smbus2 import SMBus
+import time
 
 # Globals for the object
-CMD_READ_FIRMWARE_VER = 0x13
-CMD_CHANNEL_CONTROL = 0x10
-CMD_SAVE_I2C_ADDR = 0x11
-CMD_READ_I2C_ADDR = 0x12
-CMD_READ_FIRMWARE_VER = 0x13
+CMD_READ_FIRMWARE_VER = [0x13]
+CMD_CHANNEL_CONTROL = [0x10]
+CMD_SAVE_I2C_ADDR = [0x11]
+CMD_READ_I2C_ADDR = [0x12]
+CMD_READ_FIRMWARE_VER = [0x13]
 CHANNEL_BIT = {
     "1": 0b00000001,
     "2": 0b00000010,
@@ -32,72 +35,54 @@ CHANNEL_BIT = {
 class Relay:
     def __init__(
         self,
+        i2cbus=1,
         device_address=0x11,
         num_relays=4,
         SCL=None,
         SDA=None,
         debug_action=False,
     ):
-        import board
-        import busio
 
+        self.I2CBusNum = i2cbus
         self.DEVICE_ADDRESS = device_address
         self.NUM_RELAY_PORTS = num_relays  # 4 or 8 are really the only allowed numbers
         self.channel_state = 0x00
 
         print("Initializing relay board at 0x{:x}".format(self.DEVICE_ADDRESS))
 
-        if SCL is None:
-            SCL = board.D5  # Set this based on board pins, defined in Adafruit board.
-
-        if SDA is None:
-            SDA = board.D3  # Set this based on board pins, defined in Adafruit board.
-
-        self.i2c = busio.I2C(SCL, SDA)
-
         if debug_action:
             print("Enabling action_output mode")
 
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                self.DEVICE_ADDRESS,
-                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
-            )
-
-        finally:
-            self.i2c.unlock()
         self.debug = debug_action
+
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(
+                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
+            )
+        return True
 
     # If you have address conflicts on your I2C bus you can use this function to reset the relay module address
     # Remember to change your address in your code for future instantiations of this object
 
     def change_i2c_address(self, old_address, new_address):
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                old_address,
-                bytes([CMD_SAVE_I2C_ADDR] + [new_address]),
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(
+                self.DEVICE_ADDRESS, CMD_SAVE_I2C_ADDR, [new_address]
             )
             self.DEVICE_ADDRESS = new_address
-        finally:
-            self.i2c.unlock()
+        return True
 
     # This function is for when your code keeps track of the full state of all relays and you just want to toggle directly.
     def channel_control(self, state):
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                self.DEVICE_ADDRESS,
-                bytes([CMD_CHANNEL_CONTROL] + [state]),
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(
+                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [state]
             )
             self.channel_state = state
-
-        finally:
-            self.i2c.unlock()
+            time.sleep(
+                0.05
+            )  # Wait 50ms for activation, probably not needed but fine anyways
+        return True
 
     # Turn on a single channel
     def channel_on(self, relay_num):
@@ -106,20 +91,17 @@ class Relay:
                 if self.debug:
                     print("Turning relay {} on".format(relay_num))
                 self.channel_state |= 1 << (relay_num - 1)
-                while not self.i2c.try_lock():
-                    pass
-                try:
-                    self.i2c.writeto(
-                        self.DEVICE_ADDRESS,
-                        bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
+                with SMBus(self.I2CBusNum) as i2c_bus:
+                    i2c_bus.write_i2c_block_data(
+                        self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
                     )
-
-                finally:
-                    self.i2c.unlock()
+                return True
             else:
                 print("Invalid relay: #{}".format(relay_num))
+                return False
         else:
             print("Relay number must be an Integer value")
+            return False
 
     # Turn off a single channel
     def channel_off(self, relay_num):
@@ -128,52 +110,39 @@ class Relay:
                 if self.debug:
                     print("Turning relay {} off".format(relay_num))
                 self.channel_state &= ~(1 << (relay_num - 1))
-                while not self.i2c.try_lock():
-                    pass
-                try:
-                    self.i2c.writeto(
-                        self.DEVICE_ADDRESS,
-                        bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
+                with SMBus(self.I2CBusNum) as i2c_bus:
+                    i2c_bus.write_i2c_block_data(
+                        self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
                     )
-
-                finally:
-                    self.i2c.unlock()
+                return True
             else:
                 print("Invalid relay: #{}".format(relay_num))
+                return False
         else:
             print("Relay number must be an Integer value")
+            return False
 
     # Turn on all channels at once.
     def all_channel_on(self):
         if self.debug:
             print("Turning all relays ON")
         self.channel_state |= 0xF << 0
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                self.DEVICE_ADDRESS,
-                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(
+                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
             )
-
-        finally:
-            self.i2c.unlock()
+        return True
 
     # Turn off all channels at once.
     def all_channel_off(self):
         if self.debug:
             print("Turning all relays OFF")
         self.channel_state &= ~(0xF << 0)
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                self.DEVICE_ADDRESS,
-                bytes([CMD_CHANNEL_CONTROL] + [self.channel_state]),
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(
+                self.DEVICE_ADDRESS, CMD_CHANNEL_CONTROL, [self.channel_state]
             )
-
-        finally:
-            self.i2c.unlock()
+        return True
 
     # Toggle state for a single relay.  On -> Off, Off -> On
     def toggle_channel(self, relay_num):
@@ -219,18 +188,6 @@ class Relay:
     # Query the board and get the current firmware version.
     # 99% of the time people won't need this I suspect but copied as it was part of Arduino ref lib
     def get_firmware_version(self):
-        while not self.i2c.try_lock():
-            pass
-        try:
-            self.i2c.writeto(
-                self.DEVICE_ADDRESS,
-                bytes(CMD_READ_FIRMWARE_VER),
-                stop=False,
-            )
-            buffer = bytearray(1)
-            self.i2c.readfrom_into(self.DEVICE_ADDRESS, buffer)
-            # return the specified version
-            return buffer
-
-        finally:
-            self.i2c.unlock()
+        with SMBus(self.I2CBusNum) as i2c_bus:
+            i2c_bus.write_i2c_block_data(self.DEVICE_ADDRESS, 0, CMD_READ_FIRMWARE_VER)
+        return i2c_bus.read_i2c_block_data(self.DEVICE_ADDR, 0, 7)

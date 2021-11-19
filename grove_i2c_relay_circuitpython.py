@@ -1,16 +1,20 @@
-# =========================================================
-# Seeed Studio Grove - 4/8-Channel I2C SPDT/SSR Relay Board
-# CircuitPython Module
-#
-# by Raymond Richmond
-#
-# Modified from code by John M. Wargo (https://github.com/johnwargo/seeed-studio-relay-v2)
-# to support CircuitPython and this specific relay board family.
-# Not using adafruit_bus_device I2CDevice as I don't need it and it isn't included on
-# every MCU board out there nor by default in blinka and I think best to keep things simple.
-# Note: I have not tested this on the 8 channel boards yet so let me know if you try
-# this module and things work or not.
-# =========================================================
+"""
+ Seeed Studio Grove - 4/8-Channel I2C SPDT/SSR Relay Board
+ CircuitPython Module
+
+ by Raymond Richmond
+
+ Modified from code by John M. Wargo (https://github.com/johnwargo/seeed-studio-relay-v2)
+ to support CircuitPython and this specific relay board family.
+ Not using adafruit_bus_device I2CDevice as I don't need it and it isn't included on
+ every MCU board out there nor by default in blinka and I think best to keep things simple.
+ Note: I have not tested this on the 8 channel boards yet so let me know if you try
+ this module and things work or not.
+"""
+
+import board
+import busio
+import time
 
 # Globals for the object
 CMD_READ_FIRMWARE_VER = 0x13
@@ -39,8 +43,6 @@ class Relay:
         SDA=None,
         debug_action=False,
     ):
-        import board
-        import busio
 
         self.DEVICE_ADDRESS = device_address
         self.NUM_RELAY_PORTS = num_relays  # 4 or 8 are really the only allowed numbers
